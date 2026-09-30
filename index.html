@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ozan Eczanesi - Ödeme</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,sans-serif;background:#f3f6f8;color:#17212b}
+  .wrap{max-width:430px;margin:auto;padding:24px 16px 36px}
+  .card{background:white;border-radius:22px;padding:24px;box-shadow:0 8px 30px #00000012}
+  .logo{width:58px;height:58px;border-radius:16px;background:#168b63;color:white;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin-bottom:16px}
+  h1{font-size:25px;margin:0 0 5px}.sub{color:#66727d;margin:0 0 24px}
+  label{display:block;font-weight:700;margin:18px 0 8px}
+  input{width:100%;padding:15px;border:1px solid #d5dce1;border-radius:12px;font-size:18px;outline:none}
+  input:focus{border-color:#168b63}
+  .iban{background:#f6f8f9;padding:14px;border-radius:12px;font-weight:700;word-break:break-all}
+  button{width:100%;border:0;border-radius:12px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px}
+  .primary{background:#168b63;color:#fff}.secondary{background:#e9f4ef;color:#126b4c}
+  .amount{font-size:24px;font-weight:700;color:#168b63;text-align:center;margin:14px 0}
+  .note{font-size:13px;color:#6d7880;text-align:center;margin-top:18px;line-height:1.5}
+  #status{text-align:center;font-size:14px;margin-top:10px;min-height:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="logo">O</div>
+    <h1>Ozan Eczanesi</h1>
+    <p class="sub">Güvenli ödeme bilgileri</p>
+
+    <label for="amount">Ödenecek tutar</label>
+    <input id="amount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Örn. 350,00">
+    <div id="display" class="amount">0,00 TL</div>
+
+    <label>Hesap sahibi</label>
+    <div>Hakkı Ozan Karakaya</div>
+
+    <label>IBAN</label>
+    <div class="iban" id="iban">TR00 0000 0000 0000 0000 0000 00</div>
+
+    <button class="primary" onclick="copyIban()">IBAN'ı Kopyala</button>
+    <button class="secondary" onclick="sharePayment()">Ödeme Bilgilerini Paylaş</button>
+
+    <div id="status"></div>
+    <p class="note">Bu sayfa ödeme kuruluşu değildir. Ödemeyi bankanızın mobil uygulaması üzerinden havale/EFT ile gerçekleştirin.</p>
+  </div>
+</div>
+
+<script>
+const iban = "TR00 0000 0000 0000 0000 0000 00";
+const amount = document.getElementById("amount");
+const display = document.getElementById("display");
+const status = document.getElementById("status");
+
+amount.addEventListener("input", () => {
+  const n = parseFloat(amount.value);
+  display.textContent = Number.isFinite(n)
+    ? n.toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2}) + " TL"
+    : "0,00 TL";
+});
+
+async function copyIban(){
+  try{
+    await navigator.clipboard.writeText(iban.replaceAll(" ",""));
+    status.textContent = "IBAN kopyalandı.";
+  }catch(e){
+    status.textContent = "IBAN: " + iban;
+  }
+  setTimeout(()=>status.textContent="",3000);
+}
+
+async function sharePayment(){
+  const n = parseFloat(amount.value);
+  const text = `Ozan Eczanesi\\nHesap sahibi: Hakkı Ozan Karakaya\\nIBAN: ${iban}\\nTutar: ${Number.isFinite(n)?n.toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2})+" TL":"Belirtilmedi"}`;
+  if(navigator.share){
+    await navigator.share({title:"Ozan Eczanesi Ödeme",text});
+  }else{
+    await navigator.clipboard.writeText(text);
+    status.textContent = "Ödeme bilgileri kopyalandı.";
+    setTimeout(()=>status.textContent="",3000);
+  }
+}
+</script>
+</body>
+</html>
